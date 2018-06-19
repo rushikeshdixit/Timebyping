@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <base href="/">
+        <title>Notes App</title>
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    </head>
+    <body>
+        <div class="container container-fluid">
+            <div class="row">
+                <div class="col-md-1"></div>
+                <div class="col-md-10">
+                    <form action="/note" style="margin-top: 20px; margin-bottom: 20px" method="POST">
+                        <label for="title">Title</label>
+                        <input type="text" name="title" />
+                        <br/>
+                        <label for="content" style="display:block">Content</label>
+                        <textarea type="text" name="content" cols="50" rows="10"> </textarea>
+                        <br/>
+                        <input type="submit" value="submit"/>
+                    </form>
+                    <div class="container" style="margin-top: 20px">
+                        <table class="table table-striped" id="notes" />
+                        <p id="notesP"></p>
+                    </div>
+                </div>
+                <div class="col-md-1"></div>
+            </div>
+        </div>
+        <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+        <script>
+            window.onload = () => {
+                $.ajax({
+                    url: '/notes',
+                    type: 'GET',
+                    success: (data) => {
+                        console.log(data);
+                        var notes = data.obj.map(x => {
+                            return {'title': x.title, 'content': x.content};
+                        });
+                        console.log(notes);
+                        //makeTable(notes, "notes");
+                        makePara(notes, "notesP");
+                    },
+                    error: function(jqXHR,error, errorThrown) { 
+                        console.log(error)
+                    }
+                })
+            }
+
+            function makePara(data, paraName) {
+                var para = document.getElementById(paraName);
+                para.innerHTML = '';
+                if(data.length == 0) {
+                    return ;
+                }
+                for(let index=0; index < data.length; index++) {
+                    var b = document.createElement('b');
+                    b.innerHTML = data[index].title;
+                    para.appendChild(b);
+                    var pre = document.createElement('pre');
+                    pre.innerHTML = data[index].content;
+                    para.appendChild(pre);
+                    para.appendChild(document.createElement('br'));
+                }
+            }
+
+            function makeTable(data, tableName) {
+                var tbl = document.getElementById(tableName);
+                tbl.innerHTML = '';
+                if(data.length == 0) {
+                    return ;
+                }
+                var keysobj = Object.keys(data[0]);
+                var trhead = document.createElement("tr");
+                for(var k=0;k<keysobj.length; k++) {
+                    th = document.createElement("th");
+                    th.innerHTML = keysobj[k].toUpperCase();
+                    trhead.appendChild(th);
+                }
+                tbl.append(trhead);
+                for(let index=0; index < data.length; index++) {
+                    var tr = document.createElement("tr");
+                    for(var k=0;k<keysobj.length; k++) {
+                        var td = document.createElement("td");
+                        if(keysobj[k] == "content") {
+                            td.innerHTML = "<pre>" + data[index][keysobj[k]] + "</pre>";
+                        }
+                        else {
+                            td.innerHTML = data[index][keysobj[k]];
+                        }
+                        tr.append(td);
+                    }
+                    tbl.append(tr);
+                }
+            }
+
+        </script>
+    </body>
+</html>
