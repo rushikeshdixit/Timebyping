@@ -32,16 +32,17 @@
         <script>
             window.onload = () => {
                 $.ajax({
-                    url: '/notes',
+                    url: '/note',
                     type: 'GET',
                     success: (data) => {
                         console.log(data);
-                        var notes = data.obj.map(x => {
+                        /*var notes = data.obj.map(x => {
                             return {'title': x.title, 'content': x.content};
                         });
-                        console.log(notes);
+                        //console.log(notes);
                         //makeTable(notes, "notes");
-                        makePara(notes, "notesP");
+                        makePara(notes, "notesP");*/
+                        makePara(data.obj, "notesP");
                     },
                     error: function(jqXHR,error, errorThrown) { 
                         console.log(error)
@@ -55,6 +56,25 @@
                 if(data.length == 0) {
                     return ;
                 }
+                var clickHandler =  function(event){
+                    var id = event.target.getAttribute('delid')
+                    console.log(id);
+                    $.ajax({
+                        url: '/note/' + id,
+                        type: 'DELETE',
+                        /*data: id,
+                        contentType: "application/json; charset=utf-8",
+                        dataType: "json",*/
+                        success: (data) => {
+                            console.log("SUCCESS");
+                        },
+                        error: function(jqXHR,error, errorThrown) { 
+                            console.log(error);
+                            location.reload(true);
+                        }
+                    })
+
+                };
                 for(let index=0; index < data.length; index++) {
                     var b = document.createElement('b');
                     b.innerHTML = data[index].title;
@@ -62,6 +82,12 @@
                     var pre = document.createElement('pre');
                     pre.innerHTML = data[index].content;
                     para.appendChild(pre);
+                    var button = document.createElement("button");
+                    button.innerHTML = "Delete";
+                    button.setAttribute("class", "btn btn-danger");
+                    button.setAttribute("delid", data[index]._id);
+                    button.addEventListener('click',clickHandler);
+                    para.appendChild(button);
                     para.appendChild(document.createElement('br'));
                 }
             }
